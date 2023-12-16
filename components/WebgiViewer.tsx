@@ -16,12 +16,10 @@ import {
   SSAOPlugin,
   BloomPlugin,
   GammaCorrectionPlugin,
-  mobileAndTabletCheck,
   Vector3,
 } from "webgi";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { scrollAni } from "@app/lib/ScrollAni";
+
 function WebgiViewer() {
   const memoScrollAni = useCallback(
     (position: Vector3, tar: Vector3, onUpdate: () => void) => {
@@ -34,6 +32,11 @@ function WebgiViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const setupViewer = useCallback(async () => {
+    if (typeof window === "undefined") {
+      // Skip setup on the server side
+      return;
+    }
+
     const viewer = new ViewerApp({
       canvas: canvasRef.current as HTMLCanvasElement,
     });
@@ -55,7 +58,7 @@ function WebgiViewer() {
 
     viewer.renderer.refreshPipeline();
 
-    await viewer.load("/mercedesnew.glb");
+    await viewer.load("/mercedes.glb");
 
     const tonemapPlugin = viewer.getPlugin(TonemapPlugin);
 
@@ -79,16 +82,16 @@ function WebgiViewer() {
     });
 
     memoScrollAni(position, target, onUpdate);
-  }, []);
+  }, [memoScrollAni]);
 
   useEffect(() => {
     setupViewer();
   }, []);
 
   return (
-    <div className="w-full h-full pointer-events-none flex items-center justify-center  z-20 outercanvas aspect-square ">
+    <div className="w-full h-full pointer-events-none flex items-center justify-center z-20 outercanvas aspect-square ">
       <canvas
-        className=" p-5 bg-transparent  canvas  rounded-[50%] w-full h-full"
+        className="p-5 bg-transparent canvas rounded-[50%] w-full h-full"
         ref={canvasRef}
       />
     </div>
